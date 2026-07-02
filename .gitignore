@@ -1,0 +1,8 @@
+node_modules/
+dist/
+coverage/
+tests/tck/reports/*
+!tests/tck/reports/.gitkeep
+.env
+.DS_Store
+
