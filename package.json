@@ -2,6 +2,7 @@
   "name": "box-cmis-tck",
   "version": "0.1.0",
   "description": "Optimized CMIS compatibility test kit for Box-backed CMIS Browser Binding services",
+  "license": "MIT",
   "type": "module",
   "packageManager": "bun@1.3.11",
   "scripts": {

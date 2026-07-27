@@ -230,6 +230,10 @@ Report upload uses the same Box credentials as the raw REST comparisons. Fix tho
 
 Confirm that the relationship metadata template exists, its property key matches `BOX_CMIS_RELATIONSHIP_TEMPLATE`, and the Box application can read and write that template.
 
+## License
+
+Licensed under the [MIT License](LICENSE).
+
 ## Contributing
 
 Keep new tests bounded and map them to the corresponding OpenCMIS behavior. Add local assertions where practical, protect live mutations with the correct guard, record cleanup, and update the parity map when coverage changes.
