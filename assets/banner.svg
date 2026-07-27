@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 300" role="img" aria-label="box-cmis-tck — CMIS conformance with paired Box REST benchmarks">
+  <title>box-cmis-tck</title>
+
+  <defs>
+    <pattern id="dots" width="26" height="26" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="2" fill="#16233a"/>
+    </pattern>
+  </defs>
+
+  <rect width="1200" height="300" fill="#0b172a"/>
+  <rect width="1200" height="300" fill="url(#dots)"/>
+  <rect width="1200" height="6" fill="#0866d9"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="70" cy="104" r="16" stroke="#0866d9" stroke-width="8"/>
+    <circle cx="70" cy="206" r="16" stroke="#5c9df2" stroke-width="8"/>
+    <path d="M86 104h78l38 38" stroke="#0866d9" stroke-width="8"/>
+    <path d="M86 206h78l38-38" stroke="#5c9df2" stroke-width="8"/>
+
+    <path d="m238 58 78 45v104l-78 45-78-45V103Z" stroke="#fffefa" stroke-width="8"/>
+    <path d="m238 105 46 27-46 27-46-27Z" stroke="#8fbcf7" stroke-width="6"/>
+    <path d="M192 132v54l46 27 46-27v-54M238 159v54" stroke="#5c9df2" stroke-width="6"/>
+    <path d="m210 186 20 20 40-46" stroke="#fffefa" stroke-width="9"/>
+
+    <path d="M316 155h40" stroke="#0866d9" stroke-width="8"/>
+    <circle cx="374" cy="155" r="16" stroke="#0866d9" stroke-width="8"/>
+  </g>
+
+  <g font-family="ui-monospace, SFMono-Regular, Menlo, monospace" font-size="13" font-weight="700" letter-spacing="2">
+    <text x="50" y="76" fill="#5c9df2">CMIS</text>
+    <text x="50" y="244" fill="#8fbcf7">REST</text>
+  </g>
+
+  <circle cx="340" cy="76" r="5" fill="#ff6658"/>
+
+  <text x="430" y="102" font-family="ui-monospace, SFMono-Regular, Menlo, monospace"
+        font-size="19" letter-spacing="3.5" fill="#5c9df2" font-weight="600">CMIS 1.1 &#183; BOX REST &#183; PAIRED BENCHMARKS</text>
+
+  <text x="426" y="190" font-family="'Helvetica Neue', Helvetica, Arial, sans-serif"
+        font-size="78" font-weight="800" letter-spacing="-2">
+    <tspan fill="#fffefa">box-cmis-tck</tspan><tspan fill="#ff6658">.</tspan>
+  </text>
+
+  <text x="431" y="234" font-family="Georgia, 'Times New Roman', serif"
+        font-size="24" font-style="italic" fill="#9fb0c6">Conformance tested &#8212; performance compared &#8212; reports published.</text>
+</svg>
