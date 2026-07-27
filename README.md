@@ -1,4 +1,4 @@
-![box-cmis-tck — CMIS conformance with paired Box REST benchmarks](assets/banner.svg)
+![box-cmis-tck — CMIS conformance with paired Box REST benchmarks](assets/github-banner.svg)
 
 # Box CMIS Technology Compatibility Kit
 
