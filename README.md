@@ -1,8 +1,17 @@
+![box-cmis-tck — CMIS conformance with paired Box REST benchmarks](assets/github-banner.svg)
+
 # Box CMIS Technology Compatibility Kit
+
+[![License: MIT](https://img.shields.io/badge/license-MIT-0866d9.svg)](LICENSE)
+![Runtime: Bun](https://img.shields.io/badge/runtime-Bun-000?logo=bun&logoColor=white)
+![Protocols](https://img.shields.io/badge/protocols-CMIS%201.1%20%C2%B7%20Box%20REST-0866d9)
 
 A fast, Box-aware compatibility test kit for CMIS 1.1 Browser Binding services.
 
 The project validates the [Box CMIS connector](https://github.com/unofficialbox/box-cmis-connector) against CMIS behavior derived from Apache Chemistry OpenCMIS. For live operations, it runs equivalent CMIS and native Box REST API calls, compares their responses and elapsed times, and produces portable JSON, Markdown, CSV, and HTML reports.
+
+> **Not affiliated with, authorized, or endorsed by Box, Inc.** "Box" is a
+> trademark of Box, Inc. This is an independent community compatibility suite.
 
 ## Why this project exists
 

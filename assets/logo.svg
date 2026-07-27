@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Box CMIS TCK logo">
+  <title>Box CMIS TCK</title>
+
+  <defs>
+    <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse">
+      <circle cx="2" cy="2" r="1.5" fill="#16233a"/>
+    </pattern>
+  </defs>
+
+  <rect width="512" height="512" rx="72" fill="#0b172a"/>
+  <rect width="512" height="512" rx="72" fill="url(#dots)"/>
+  <path d="M72 0h368a72 72 0 0 1 72 72v0H0v0A72 72 0 0 1 72 0Z" fill="#0866d9"/>
+
+  <g fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <circle cx="82" cy="178" r="24" stroke="#0866d9" stroke-width="14"/>
+    <circle cx="82" cy="334" r="24" stroke="#5c9df2" stroke-width="14"/>
+    <path d="M106 178h78l42 42" stroke="#0866d9" stroke-width="14"/>
+    <path d="M106 334h78l42-42" stroke="#5c9df2" stroke-width="14"/>
+
+    <path d="M256 116 350 170v172l-94 54-94-54V170Z" stroke="#fffefa" stroke-width="14"/>
+    <path d="m256 174 58 34-58 34-58-34Z" stroke="#8fbcf7" stroke-width="10"/>
+    <path d="M198 208v70l58 34 58-34v-70M256 242v70" stroke="#5c9df2" stroke-width="10"/>
+    <path d="m222 282 25 25 51-58" stroke="#fffefa" stroke-width="15"/>
+
+    <path d="M350 256h56" stroke="#0866d9" stroke-width="14"/>
+    <circle cx="430" cy="256" r="24" stroke="#0866d9" stroke-width="14"/>
+  </g>
+
+  <circle cx="438" cy="92" r="8" fill="#ff6658"/>
+</svg>
