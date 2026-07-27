@@ -5,7 +5,10 @@
   "type": "module",
   "packageManager": "bun@1.3.11",
   "scripts": {
-    "test": "bun test tests/tck"
+    "test": "bun test tests/tck",
+    "benchmark:paired": "bun tests/tck/run-paired-benchmark.ts",
+    "report:aggregate": "bun tests/tck/aggregate-comparisons.ts",
+    "report:evaluate": "bun tests/tck/evaluate-performance.ts"
   },
   "devDependencies": {
     "@types/node": "^22.10.0"

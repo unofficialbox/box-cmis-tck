@@ -1,8 +1,20 @@
 node_modules/
 dist/
 coverage/
-tests/tck/reports/*
-!tests/tck/reports/.gitkeep
 .env
+.env.*
+!.env.example
 .DS_Store
+*.log
+*.tsbuildinfo
 
+# TCK run output is published to the configured Box fixture folder, not Git.
+tests/tck/reports/**
+!tests/tck/reports/.gitkeep
+
+# Local planning, historical run notes, and cross-repository handoffs.
+/CONNECTOR_DEFECT_HANDOFF.md
+/OPTIMIZED_TCK_PLAN.md
+/TCK_ANALYSIS_HANDOFF.md
+/TCK_METRICS_COMPARISON.md
+/TCK_STATUS.md
