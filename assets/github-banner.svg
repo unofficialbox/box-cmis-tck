@@ -20,7 +20,6 @@
     <path d="m238 58 78 45v104l-78 45-78-45V103Z" stroke="#fffefa" stroke-width="8"/>
     <path d="m238 105 46 27-46 27-46-27Z" stroke="#8fbcf7" stroke-width="6"/>
     <path d="M192 132v54l46 27 46-27v-54M238 159v54" stroke="#5c9df2" stroke-width="6"/>
-    <path d="m210 186 20 20 40-46" stroke="#fffefa" stroke-width="9"/>
 
     <path d="M316 155h40" stroke="#0866d9" stroke-width="8"/>
     <circle cx="374" cy="155" r="16" stroke="#0866d9" stroke-width="8"/>
