@@ -8,7 +8,7 @@ import { aggregateComparisonDirectory, aggregateComparisonReports, renderCompari
 import type { ComparisonAggregateReport, ProtocolAggregate } from "./aggregate.js";
 import { createCmisClient } from "./client.js";
 import { createBoxRestClient } from "./box-rest-client.js";
-import { createSideBySideComparison, measureOperation } from "./comparison.js";
+import { createSideBySideComparison, measureOperation, type SideBySideComparison } from "./comparison.js";
 import { parseBoolean, readTckConfig, requireDestructiveTckConfig, requireLiveReadTckConfig, requireStressTckConfig } from "./config.js";
 import { buildFixtureName, buildRunId } from "./fixtures.js";
 import { renderFinalHtmlReport } from "./final-html-report.js";
@@ -40,7 +40,10 @@ test("createCmisClient builds repository-scoped Browser Binding requests", async
     requests.push({ url: String(input), body: String(init?.body) });
     return new Response(JSON.stringify({ properties: { "cmis:objectId": { value: "file:1" } } }), {
       status: 201,
-      headers: { "x-box-cmis-box-sdk-retry-count": "2" }
+      headers: {
+        "x-box-cmis-box-sdk-retry-count": "2",
+        "x-box-cmis-relationship-timings": JSON.stringify({ "source-read": 12.5, "source-write": 24.75 })
+      }
     });
   }) as typeof fetch;
 
@@ -64,6 +67,7 @@ test("createCmisClient builds repository-scoped Browser Binding requests", async
     assert.match(requests[0]?.body ?? "", /cmisaction=createDocument/);
     assert.match(requests[0]?.body ?? "", /propertyValue%5B1%5D=Empty\.txt/);
     assert.equal(comparison.measurements[0]?.serverRetryCount, 2);
+    assert.deepEqual(comparison.measurements[0]?.serverTimings, { "source-read": 12.5, "source-write": 24.75 });
   } finally {
     globalThis.fetch = originalFetch;
   }
@@ -230,6 +234,31 @@ test("aggregateComparisonReports calculates medians p95 deltas and retries", () 
   assert.match(markdown, /insufficient-samples, box-rest-retries/);
   assert.match(csv, /cmis_stddev_ms/);
   assert.match(csv, /phase2,phase2\.example,read-document,3/);
+});
+
+test("aggregates connector relationship stage timings into every report format", () => {
+  const reports = [
+    comparisonReport("timed-1", 100, 80, 0),
+    comparisonReport("timed-2", 110, 85, 0),
+    comparisonReport("timed-3", 120, 90, 0)
+  ];
+  const sourceReads = [20, 30, 40];
+  reports.forEach((report, index) => {
+    const comparison = report.results[0]?.details?.comparison as SideBySideComparison;
+    comparison.measurements[0]!.serverTimings = {
+      "source-read": sourceReads[index]!,
+      "source-write": sourceReads[index]! * 2
+    };
+  });
+
+  const aggregate = aggregateComparisonReports(reports, "2026-08-10T00:00:00.000Z");
+  assert.deepEqual(aggregate.rows[0]?.serverTimings?.cmis, {
+    "source-read": { sampleCount: 3, medianMs: 30, p95Ms: 40, meanMs: 30 },
+    "source-write": { sampleCount: 3, medianMs: 60, p95Ms: 80, meanMs: 60 }
+  });
+  assert.match(renderComparisonAggregateMarkdown(aggregate), /Connector Stage Timings/);
+  assert.match(renderComparisonAggregateCsv(aggregate), /source-read/);
+  assert.match(renderFinalHtmlReport(aggregate), /Connector stage timings/);
 });
 
 test("final HTML report renders side-by-side metrics and advisory findings", () => {

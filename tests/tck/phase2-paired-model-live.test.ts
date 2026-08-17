@@ -17,21 +17,31 @@ live("phase2.relationshipMutation compares CMIS relationships with Box metadata"
   const [scope, templateKey, propertyKey] = template; assert.ok(scope && templateKey && propertyKey);
   const cmis = createCmisClient(config); const box = await createBoxRestClient(config); const comparison = createSideBySideComparison(); const runId = buildRunId();
   const cmisIds: string[] = []; const boxIds: string[] = [];
-  await recordTimedResult({runId:`${runId}-phase2-relationship-comparison`,reportDir:config.reportDir,phase:"phase2",testId:"phase2.relationshipMutationUnsupported",openCmisTests:["CreateAndDeleteRelationshipTest"],coverageMode:"equivalent",fixtureRootId:root,createdObjectCount:4,deletedObjectCount:4,cleanupStatus:"pass",details:{semanticDifference:"CMIS writes mirrored relationship metadata; direct Box REST comparison writes the configured source metadata instance",comparison}},async()=>{
+  await recordTimedResult({runId:`${runId}-phase2-relationship-comparison`,reportDir:config.reportDir,phase:"phase2",testId:"phase2.relationshipMutationUnsupported",openCmisTests:["CreateAndDeleteRelationshipTest"],coverageMode:"equivalent",fixtureRootId:root,createdObjectCount:4,deletedObjectCount:4,cleanupStatus:"pass",details:{comparisonSemantics:"Both protocols write and remove the relationship metadata on source and target objects",comparison}},async()=>{
     try {
       for (const side of ["source","target"]) { const c=await cmis.createDocument(`folder:${root}`,`${buildFixtureName(runId,"phase2",`rel-${side}-cmis`)}.txt`,side); const id=propertyValue<string>(c,"cmis:objectId"); assert.ok(id); cmisIds.push(id); const b=await box.uploadFile(root,`${buildFixtureName(runId,"phase2",`rel-${side}-box`)}.txt`,side); boxIds.push(b.id); }
       const relationshipId=`relationship:${cmisIds[0]}:${cmisIds[1]}:paired`;
       await measureOperation(comparison,"create-relationship","cmis",()=>cmis.createRelationship(cmisIds[0]!,cmisIds[1]!,relationshipId,"Paired relationship"),v=>({objectId:propertyValue(v,"cmis:objectId")}));
       await measureOperation(comparison,"read-relationship-metadata","box-rest",()=>box.getFileMetadata(cmisIds[0]!.replace(/^file:/,""),scope,templateKey),v=>({httpStatus:v.status,fields:Object.keys(v.payload),relationshipValue:v.payload[propertyKey]}));
       const entry={id:`relationship:${boxIds[0]}:${boxIds[1]}:paired`,sourceId:`file:${boxIds[0]}`,targetId:`file:${boxIds[1]}`,name:"Paired relationship",typeId:"cmis:relationship"};
-      const created=await measureOperation(comparison,"create-relationship","box-rest",()=>box.createFileMetadata(boxIds[0]!,scope,templateKey,{[propertyKey]:JSON.stringify([entry])}),v=>({httpStatus:v.status})); assert.equal(created.status,201);
+      const created=await measureOperation(comparison,"create-relationship","box-rest",async()=>{
+        const source=await box.createFileMetadata(boxIds[0]!,scope,templateKey,{[propertyKey]:JSON.stringify([entry])});
+        const target=await box.createFileMetadata(boxIds[1]!,scope,templateKey,{[propertyKey]:JSON.stringify([entry])});
+        return {source,target};
+      },v=>({sourceHttpStatus:v.source.status,targetHttpStatus:v.target.status}));
+      assert.equal(created.source.status,201); assert.equal(created.target.status,201);
       await measureOperation(comparison,"delete-relationship","cmis",async()=>{
         const deadline=Date.now()+30_000;
         let result=await cmis.deleteRelationshipStatus(cmisIds[0]!,relationshipId);
         while(result.status===404&&Date.now()<deadline){await new Promise(resolve=>setTimeout(resolve,1_000));result=await cmis.deleteRelationshipStatus(cmisIds[0]!,relationshipId);}
         assert.equal(result.status,200,JSON.stringify(result.payload)); return result;
       },v=>({httpStatus:v.status}));
-      const removed=await measureOperation(comparison,"delete-relationship","box-rest",()=>box.deleteFileMetadata(boxIds[0]!,scope,templateKey),v=>({httpStatus:v.status})); assert.equal(removed.status,204);
+      const removed=await measureOperation(comparison,"delete-relationship","box-rest",async()=>{
+        const source=await box.deleteFileMetadata(boxIds[0]!,scope,templateKey);
+        const target=await box.deleteFileMetadata(boxIds[1]!,scope,templateKey);
+        return {source,target};
+      },v=>({sourceHttpStatus:v.source.status,targetHttpStatus:v.target.status}));
+      assert.equal(removed.source.status,204); assert.equal(removed.target.status,204);
     } finally { await Promise.all(cmisIds.map(id=>cmis.deleteObject(id))); await Promise.all(boxIds.map(id=>box.deleteFile(id))); }
   });
 });

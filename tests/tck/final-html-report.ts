@@ -40,6 +40,22 @@ export function renderFinalHtmlReport(
             <td class="number">${row.cmis.totalRetries + row.boxRest.totalRetries}</td>
             <td>${row.flags.length === 0 ? '<span class="pill good-pill">none</span>' : row.flags.map((flag) => `<span class="pill">${escapeHtml(flag)}</span>`).join(" ")}</td>
           </tr>`).join("");
+  const timingRows = aggregate.rows.flatMap((row) => [
+    ...Object.entries(row.serverTimings?.cmis ?? {}).map(([stage, timing]) => ({ row, protocol: "CMIS", stage, timing })),
+    ...Object.entries(row.serverTimings?.boxRest ?? {}).map(([stage, timing]) => ({ row, protocol: "Box REST", stage, timing }))
+  ]);
+  const stageRows = timingRows.length === 0 ? `
+          <tr><td colspan="8" class="note">No connector stage timings were reported.</td></tr>` : timingRows.map(({ row, protocol, stage, timing }) => `
+          <tr>
+            <td><strong>${escapeHtml(row.testId)}</strong></td>
+            <td>${escapeHtml(row.operation)}</td>
+            <td>${escapeHtml(protocol)}</td>
+            <td>${escapeHtml(stage)}</td>
+            <td class="number">${timing.sampleCount}</td>
+            <td class="number">${formatMs(timing.medianMs)}</td>
+            <td class="number">${formatMs(timing.p95Ms)}</td>
+            <td class="number">${formatMs(timing.meanMs)}</td>
+          </tr>`).join("");
   const findingRows = findings.length === 0 ? `
           <tr><td colspan="6" class="good">No advisory findings.</td></tr>` : findings.map((finding) => `
           <tr>
@@ -106,6 +122,15 @@ export function renderFinalHtmlReport(
       <table>
         <thead><tr><th>Phase</th><th>Test</th><th>Operation</th><th>Samples</th><th>Tests pass/fail</th><th>CMIS median / p95</th><th>Box REST median / p95</th><th>Median delta</th><th>Median ratio</th><th>Client retries</th><th>Flags</th></tr></thead>
         <tbody>${rows}</tbody>
+      </table>
+    </div>
+
+    <h2>Connector stage timings</h2>
+    <p class="note">Request-scoped timings reported by the connector for internal Box operations.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Test</th><th>Operation</th><th>Protocol</th><th>Stage</th><th>Samples</th><th>Median</th><th>p95</th><th>Mean</th></tr></thead>
+        <tbody>${stageRows}</tbody>
       </table>
     </div>
 

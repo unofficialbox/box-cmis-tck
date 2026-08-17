@@ -29,7 +29,18 @@ export interface ComparisonAggregateRow {
   boxRest: ProtocolAggregate;
   deltaMs: { medianMs?: number; p95Ms?: number };
   cmisToBoxRestRatio: { median?: number; p95?: number };
+  serverTimings?: {
+    cmis: Record<string, StageTimingAggregate>;
+    boxRest: Record<string, StageTimingAggregate>;
+  };
   flags: string[];
+}
+
+export interface StageTimingAggregate {
+  sampleCount: number;
+  medianMs: number;
+  p95Ms: number;
+  meanMs: number;
 }
 
 export interface ComparisonAggregateReport {
@@ -72,6 +83,8 @@ export function aggregateComparisonReports(
       });
     const cmisAggregate = protocolAggregate(cmis);
     const boxRestAggregate = protocolAggregate(boxRest);
+    const serverTimings = { cmis: aggregateServerTimings(cmis), boxRest: aggregateServerTimings(boxRest) };
+    const hasServerTimings = Object.keys(serverTimings.cmis).length > 0 || Object.keys(serverTimings.boxRest).length > 0;
     const ratio = distribution(pairs.filter((pair) => pair.boxRest > 0).map((pair) => pair.cmis / pair.boxRest));
     return {
       phase,
@@ -84,6 +97,7 @@ export function aggregateComparisonReports(
       boxRest: boxRestAggregate,
       deltaMs: elapsedDistribution(pairs.map((pair) => pair.cmis - pair.boxRest)),
       cmisToBoxRestRatio: ratio,
+      ...(hasServerTimings ? { serverTimings } : {}),
       flags: aggregateFlags(pairs.length, matchingResults.filter(({ status }) => status === "fail").length, cmisAggregate, boxRestAggregate, ratio.median)
     };
   });
@@ -140,6 +154,22 @@ export function renderComparisonAggregateMarkdown(report: ComparisonAggregateRep
   for (const row of report.rows) {
     lines.push(`| ${markdownCell(row.phase)} | ${markdownCell(row.testId)} | ${markdownCell(row.operation)} | ${row.pairedSampleCount} | ${row.testPassCount} / ${row.testFailCount} | ${protocolSummary(row.cmis)} | ${protocolSummary(row.boxRest)} | ${formatMs(row.deltaMs.medianMs)} | ${formatRatio(row.cmisToBoxRestRatio.median)} | ${row.cmis.totalRetries} / ${row.boxRest.totalRetries} | ${row.cmis.totalServerRetries} / ${row.boxRest.totalServerRetries} | ${row.flags.map(markdownCell).join(", ") || "none"} |`);
   }
+  const timingRows = report.rows.flatMap((row) => [
+    ...Object.entries(row.serverTimings?.cmis ?? {}).map(([stage, timing]) => ({ row, protocol: "CMIS", stage, timing })),
+    ...Object.entries(row.serverTimings?.boxRest ?? {}).map(([stage, timing]) => ({ row, protocol: "Box REST", stage, timing }))
+  ]);
+  if (timingRows.length > 0) {
+    lines.push(
+      "",
+      "## Connector Stage Timings",
+      "",
+      "| Test | Operation | Protocol | Stage | Samples | Median | p95 | Mean |",
+      "| --- | --- | --- | --- | ---: | ---: | ---: | ---: |"
+    );
+    for (const { row, protocol, stage, timing } of timingRows) {
+      lines.push(`| ${markdownCell(row.testId)} | ${markdownCell(row.operation)} | ${protocol} | ${markdownCell(stage)} | ${timing.sampleCount} | ${formatMs(timing.medianMs)} | ${formatMs(timing.p95Ms)} | ${formatMs(timing.meanMs)} |`);
+    }
+  }
   lines.push("", "Flags use fixed review thresholds: TCK result failures, unpaired operations, fewer than 10 paired samples, protocol failures or retries, coefficient of variation at least 0.50 on operations averaging at least 50 ms, p95 over twice the median with at least 50 ms absolute separation, or a median protocol ratio at least 2x apart.", "");
   return lines.join("\n");
 }
@@ -149,13 +179,14 @@ export function renderComparisonAggregateCsv(report: ComparisonAggregateReport):
     "phase", "test_id", "operation", "paired_samples", "test_pass", "test_fail",
     "cmis_pass", "cmis_fail", "cmis_median_ms", "cmis_p95_ms", "cmis_mean_ms", "cmis_stddev_ms", "cmis_cv", "cmis_total_retries", "cmis_max_retries", "cmis_total_server_retries", "cmis_max_server_retries",
     "box_rest_pass", "box_rest_fail", "box_rest_median_ms", "box_rest_p95_ms", "box_rest_mean_ms", "box_rest_stddev_ms", "box_rest_cv", "box_rest_total_retries", "box_rest_max_retries", "box_rest_total_server_retries", "box_rest_max_server_retries",
-    "delta_median_ms", "delta_p95_ms", "ratio_median", "ratio_p95", "flags"
+    "delta_median_ms", "delta_p95_ms", "ratio_median", "ratio_p95", "cmis_server_timings_json", "box_rest_server_timings_json", "flags"
   ];
   const rows = report.rows.map((row) => [
     row.phase, row.testId, row.operation, row.pairedSampleCount, row.testPassCount, row.testFailCount,
     row.cmis.passCount, row.cmis.failCount, row.cmis.medianMs, row.cmis.p95Ms, row.cmis.meanMs, row.cmis.standardDeviationMs, row.cmis.coefficientOfVariation, row.cmis.totalRetries, row.cmis.maxRetries, row.cmis.totalServerRetries, row.cmis.maxServerRetries,
     row.boxRest.passCount, row.boxRest.failCount, row.boxRest.medianMs, row.boxRest.p95Ms, row.boxRest.meanMs, row.boxRest.standardDeviationMs, row.boxRest.coefficientOfVariation, row.boxRest.totalRetries, row.boxRest.maxRetries, row.boxRest.totalServerRetries, row.boxRest.maxServerRetries,
-    row.deltaMs.medianMs, row.deltaMs.p95Ms, row.cmisToBoxRestRatio.median, row.cmisToBoxRestRatio.p95, row.flags.join(";")
+    row.deltaMs.medianMs, row.deltaMs.p95Ms, row.cmisToBoxRestRatio.median, row.cmisToBoxRestRatio.p95,
+    JSON.stringify(row.serverTimings?.cmis ?? {}), JSON.stringify(row.serverTimings?.boxRest ?? {}), row.flags.join(";")
   ]);
   return `${[header, ...rows].map((row) => row.map(csvCell).join(",")).join("\n")}\n`;
 }
@@ -186,6 +217,24 @@ function protocolAggregate(measurements: OperationMeasurement[]): ProtocolAggreg
     totalServerRetries: serverRetryCounts.reduce((sum, count) => sum + count, 0),
     maxServerRetries: Math.max(0, ...serverRetryCounts)
   };
+}
+
+function aggregateServerTimings(measurements: OperationMeasurement[]): Record<string, StageTimingAggregate> {
+  const stages = [...new Set(measurements.flatMap((measurement) => Object.keys(measurement.serverTimings ?? {})))].sort();
+  return Object.fromEntries(stages.flatMap((stage) => {
+    const values = measurements.flatMap((measurement) => {
+      const value = measurement.serverTimings?.[stage];
+      return measurement.status === "pass" && value !== undefined ? [value] : [];
+    });
+    const timingDistribution = distribution(values);
+    if (values.length === 0 || timingDistribution.median === undefined || timingDistribution.p95 === undefined) return [];
+    return [[stage, {
+      sampleCount: values.length,
+      medianMs: timingDistribution.median,
+      p95Ms: timingDistribution.p95,
+      meanMs: round(values.reduce((sum, value) => sum + value, 0) / values.length)
+    } satisfies StageTimingAggregate]];
+  }));
 }
 
 function aggregateFlags(
