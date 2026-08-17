@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import type { TckConfig } from "./config.js";
-import { recordComparisonServerRetry } from "./comparison.js";
+import { recordComparisonServerRetry, recordComparisonServerTimings } from "./comparison.js";
 
 export interface CmisProperty<T = unknown> {
   value: T;
@@ -368,6 +368,17 @@ async function fetchCmis(input: string | URL, init?: RequestInit): Promise<Respo
   const retryCount = Number(response.headers.get("x-box-cmis-box-sdk-retry-count"));
   if (Number.isInteger(retryCount) && retryCount > 0) {
     recordComparisonServerRetry(retryCount);
+  }
+  const relationshipTimings = response.headers.get("x-box-cmis-relationship-timings");
+  if (relationshipTimings) {
+    try {
+      const parsed = JSON.parse(relationshipTimings) as Record<string, unknown>;
+      recordComparisonServerTimings(Object.fromEntries(
+        Object.entries(parsed).filter((entry): entry is [string, number] => typeof entry[1] === "number")
+      ));
+    } catch {
+      // Ignore malformed optional diagnostics without changing CMIS behavior.
+    }
   }
   return response;
 }
