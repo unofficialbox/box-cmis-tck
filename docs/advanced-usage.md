@@ -108,17 +108,17 @@ bun run report:evaluate -- \
 
 The final file is the current window. The evaluator reports material median regressions, isolated or recurring tails, failures, and retries, then refreshes the current HTML report.
 
-## Focused development diagnostics
+## Metadata-backed `IN_TREE` coverage
 
-Focused tests are useful while validating new connector behavior but are not part of the stable full-benchmark contract unless added to the benchmark runner.
+The stable paired benchmark includes metadata-backed `IN_TREE` post-filtering. It builds equivalent two-level Box trees, requests the exact metadata template through both protocols, applies the same predicate, and uploads its report to the configured test folder.
 
-For metadata-backed `IN_TREE` post-filtering:
+Run this coverage independently with:
 
 ```bash
 bun test tests/tck/phase3-paired-metadata-query-live.test.ts
 ```
 
-This diagnostic requires the connector's `BOX_CMIS_METADATA_TEMPLATES` configuration and, for enterprise templates, `BOX_CMIS_ENTERPRISE_ID`. It builds equivalent two-level Box trees, requests the exact metadata template through both protocols, and uploads its report to the configured test folder.
+This test requires the connector's `BOX_CMIS_METADATA_TEMPLATES` configuration and, for enterprise templates, `BOX_CMIS_ENTERPRISE_ID`.
 
 ## Troubleshooting
 

@@ -1,6 +1,6 @@
 # OpenCMIS Parity Map
 
-Last updated: 2026-07-11
+Last updated: 2026-08-18
 
 | OpenCMIS test | Optimized test id | Status | Fixture count | Notes |
 | --- | --- | --- | ---: | --- |
@@ -34,6 +34,7 @@ Last updated: 2026-07-11
 | `QueryForObject` | `phase3.querySmokeObjectRoot` | implemented-live-opt-in | 1 document per protocol | CMIS object-id predicate versus direct Box file read. |
 | `QueryRootFolderTest` | `phase3.querySmokeObjectRoot` | implemented-live-opt-in | shared isolated root | CMIS root-folder query versus direct Box folder read. |
 | `QueryInFolderTest` | `phase3.queryInFolder` | implemented-live-opt-in | 1 folder + 2 documents per protocol | CMIS `IN_FOLDER` versus Box folder-items listing. |
+| `QueryInTreeTest` | `phase3.metadataInTree` | implemented-live-opt-in | 2 isolated 7-object trees | Metadata-backed CMIS `IN_TREE` post-filtering versus Box folder traversal with the exact metadata template field; included in repeated paired benchmarks. |
 | `QueryLikeTest` | `phase3.queryLike` | implemented-live-opt-in | 3 documents per protocol | Two prefix matches and one negative control; Box uses bounded folder listing plus the equivalent local predicate to avoid search-index lag. |
 | `QueryPagingTest` | `phase3.queryPagingInvalid` | implemented-live-opt-in | 1 folder + 3 documents per protocol | Ordered offset/limit page compared with Box folder-items paging. |
 | `InvalidQueryTest` | `phase3.queryPagingInvalid` | implemented-live-opt-in | existing paging folder | CMIS rejects malformed syntax; Box REST control records that no CMIS statement parser exists. |
