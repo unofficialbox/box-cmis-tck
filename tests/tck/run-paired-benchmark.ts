@@ -13,6 +13,7 @@ const pairedTestFiles = [
   "tests/tck/phase2-paired-model-live.test.ts",
   "tests/tck/phase2-write-live.test.ts",
   "tests/tck/phase3-paired-query-live.test.ts",
+  "tests/tck/phase3-paired-metadata-query-live.test.ts",
   "tests/tck/phase3-paired-changes-live.test.ts"
 ];
 

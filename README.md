@@ -25,7 +25,7 @@ It complements the upstream OpenCMIS TCK; it does not replace it.
 - Repeated benchmark aggregation using median and p95 statistics.
 - Automatic upload of completed live reports to the Box folder under test.
 
-Coverage includes object operations, queries, content changes, operation-context behavior, and bounded stress cases. See the [OpenCMIS parity map](open-cmis-parity.md) for the test-by-test mapping.
+Coverage includes object operations, common and metadata-backed queries, content changes, operation-context behavior, and bounded stress cases. See the [OpenCMIS parity map](open-cmis-parity.md) for the test-by-test mapping.
 
 ## Requirements
 
@@ -109,7 +109,7 @@ Reports include outcomes, cleanup status, elapsed time, median and p95 distribut
 
 ## Documentation
 
-- [Advanced usage](docs/advanced-usage.md): test modes, configuration, report tooling, benchmark evaluation, focused diagnostics, and troubleshooting.
+- [Advanced usage](docs/advanced-usage.md): test modes, configuration, metadata-query coverage, report tooling, benchmark evaluation, and troubleshooting.
 - [OpenCMIS parity map](open-cmis-parity.md): optimized coverage mapped to upstream OpenCMIS tests.
 
 ## Safety
